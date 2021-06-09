@@ -1,0 +1,3 @@
+rootProject.name = "KotlinCoroutinesWrappers"
+include ':app'
+include ':KotlinCoroutinesWrappersLib'
