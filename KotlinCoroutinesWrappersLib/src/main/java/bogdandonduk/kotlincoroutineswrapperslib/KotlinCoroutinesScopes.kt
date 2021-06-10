@@ -11,22 +11,45 @@ object KotlinCoroutinesScopes {
     private val ScopeIO = CoroutineScope(IO)
     private val ScopeIOJobs = mutableMapOf<String, Job>()
 
-    fun launchIOScopeJob(jobKeyToSave: String, replaceJobWithSameKeyIfRunning: Boolean = false, job: (CoroutineScope) -> Unit) {
-        if(replaceJobWithSameKeyIfRunning) {
+    fun launchNewIOScopeJob(
+        jobKeyToSave: String,
+        replaceOldJobWithSameKey: Boolean = false,
+        removeOnCompletion: Boolean = true,
+        job: (CoroutineScope) -> Unit
+    ) {
+        if(replaceOldJobWithSameKey){
             ScopeIOJobs[jobKeyToSave]?.cancel()
             ScopeIOJobs.remove(jobKeyToSave)
         }
 
-        if(!ScopeIOJobs.containsKey(jobKeyToSave))
+        if(!ScopeIOJobs.containsKey(jobKeyToSave)) {
             ScopeIOJobs[jobKeyToSave] = ScopeIO.launch {
                 job.invoke(this)
             }
+
+            if(removeOnCompletion) ScopeIOJobs[jobKeyToSave]!!.invokeOnCompletion {
+                ScopeIOJobs.remove(jobKeyToSave)
+            }
+        }
+    }
+
+    fun relaunchIOScopeJobIfSaved(key: String, relaunchEvenIfAlreadyActive: Boolean = true, removeOnCompletion: Boolean = true) {
+        ScopeIOJobs[key]?.run {
+            if(relaunchEvenIfAlreadyActive || !isActive) {
+                start()
+
+                if(removeOnCompletion) ScopeIOJobs[key]!!.invokeOnCompletion {
+                    ScopeIOJobs.remove(key)
+                }
+            }
+        }
     }
 
     fun getIOScopeJob(key: String) = ScopeIOJobs[key]
 
     fun cancelIOScopeJob(key: String) {
         ScopeIOJobs[key]?.cancel()
+        ScopeIO
     }
 
     fun getAllIOScopeJobs() = ScopeIOJobs
@@ -42,16 +65,38 @@ object KotlinCoroutinesScopes {
     private val ScopeDefault = CoroutineScope(Default)
     private val ScopeDefaultJobs = mutableMapOf<String, Job>()
 
-    fun launchDefaultScopeJob(jobKeyToSave: String, replaceJobWithSameKeyIfRunning: Boolean = false, job: (CoroutineScope) -> Unit) {
-        if(replaceJobWithSameKeyIfRunning) {
+    fun launchNewDefaultScopeJob(
+        jobKeyToSave: String,
+        replaceOldJobWithSameKey: Boolean = false,
+        removeOnCompletion: Boolean = true,
+        job: (CoroutineScope) -> Unit
+    ) {
+        if(replaceOldJobWithSameKey){
             ScopeDefaultJobs[jobKeyToSave]?.cancel()
             ScopeDefaultJobs.remove(jobKeyToSave)
         }
 
-        if(!ScopeDefaultJobs.containsKey(jobKeyToSave))
+        if(!ScopeDefaultJobs.containsKey(jobKeyToSave)) {
             ScopeDefaultJobs[jobKeyToSave] = ScopeDefault.launch {
                 job.invoke(this)
             }
+
+            if(removeOnCompletion) ScopeDefaultJobs[jobKeyToSave]!!.invokeOnCompletion {
+                ScopeDefaultJobs.remove(jobKeyToSave)
+            }
+        }
+    }
+
+    fun relaunchDefaultScopeJobIfSaved(key: String, relaunchEvenIfAlreadyActive: Boolean = true, removeOnCompletion: Boolean = true) {
+        ScopeDefaultJobs[key]?.run {
+            if(relaunchEvenIfAlreadyActive || !isActive) {
+                start()
+
+                if(removeOnCompletion) ScopeIOJobs[key]!!.invokeOnCompletion {
+                    ScopeDefaultJobs.remove(key)
+                }
+            }
+        }
     }
 
     fun getDefaultScopeJob(key: String) = ScopeDefaultJobs[key]
@@ -73,16 +118,38 @@ object KotlinCoroutinesScopes {
     private val ScopeMain = CoroutineScope(Main)
     private val ScopeMainJobs = mutableMapOf<String, Job>()
 
-    fun launchMainScopeJob(jobKeyToSave: String, replaceJobWithSameKeyIfRunning: Boolean = false, job: (CoroutineScope) -> Unit) {
-        if(replaceJobWithSameKeyIfRunning) {
+    fun launchNewMainScopeJob(
+        jobKeyToSave: String,
+        replaceOldJobWithSameKey: Boolean = false,
+        removeOnCompletion: Boolean = true,
+        job: (CoroutineScope) -> Unit
+    ) {
+        if(replaceOldJobWithSameKey){
             ScopeMainJobs[jobKeyToSave]?.cancel()
             ScopeMainJobs.remove(jobKeyToSave)
         }
 
-        if(!ScopeMainJobs.containsKey(jobKeyToSave))
+        if(!ScopeMainJobs.containsKey(jobKeyToSave)) {
             ScopeMainJobs[jobKeyToSave] = ScopeMain.launch {
                 job.invoke(this)
             }
+
+            if(removeOnCompletion) ScopeMainJobs[jobKeyToSave]!!.invokeOnCompletion {
+                ScopeMainJobs.remove(jobKeyToSave)
+            }
+        }
+    }
+
+    fun relaunchMainScopeJobIfSaved(key: String, relaunchEvenIfAlreadyActive: Boolean = true, removeOnCompletion: Boolean = true) {
+        ScopeMainJobs[key]?.run {
+            if(relaunchEvenIfAlreadyActive || !isActive) {
+                start()
+
+                if(removeOnCompletion) ScopeMainJobs[key]!!.invokeOnCompletion {
+                    ScopeMainJobs.remove(key)
+                }
+            }
+        }
     }
 
     fun getMainScopeJob(key: String) = ScopeMainJobs[key]
@@ -104,16 +171,38 @@ object KotlinCoroutinesScopes {
     private val ScopeMainImmediate = CoroutineScope(Main.immediate)
     private val ScopeMainImmediateJobs = mutableMapOf<String, Job>()
 
-    fun launchMainImmediateScopeJob(jobKeyToSave: String, replaceJobWithSameKeyIfRunning: Boolean = false, job: (CoroutineScope) -> Unit) {
-        if(replaceJobWithSameKeyIfRunning) {
+    fun launchNewMainImmediateScopeJob(
+        jobKeyToSave: String,
+        replaceOldJobWithSameKey: Boolean = false,
+        removeOnCompletion: Boolean = true,
+        job: (CoroutineScope) -> Unit
+    ) {
+        if(replaceOldJobWithSameKey){
             ScopeMainImmediateJobs[jobKeyToSave]?.cancel()
             ScopeMainImmediateJobs.remove(jobKeyToSave)
         }
 
-        if(!ScopeMainImmediateJobs.containsKey(jobKeyToSave))
+        if(!ScopeMainImmediateJobs.containsKey(jobKeyToSave)) {
             ScopeMainImmediateJobs[jobKeyToSave] = ScopeMainImmediate.launch {
                 job.invoke(this)
             }
+
+            if(removeOnCompletion) ScopeMainImmediateJobs[jobKeyToSave]!!.invokeOnCompletion {
+                ScopeMainImmediateJobs.remove(jobKeyToSave)
+            }
+        }
+    }
+
+    fun relaunchMainImmediateScopeJobIfSaved(key: String, relaunchEvenIfAlreadyActive: Boolean = true, removeOnCompletion: Boolean = true) {
+        ScopeMainImmediateJobs[key]?.run {
+            if(relaunchEvenIfAlreadyActive || !isActive) {
+                start()
+
+                if(removeOnCompletion) ScopeMainImmediateJobs[key]!!.invokeOnCompletion {
+                    ScopeMainImmediateJobs.remove(key)
+                }
+            }
+        }
     }
 
     fun getMainImmediateScopeJob(key: String) = ScopeMainJobs[key]
